@@ -39,9 +39,8 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: package
-          path: package.tgz
-      - run: tar zxvf package.tgz
+          path: unpacked
       - uses: JS-DevTools/npm-publish@v1
         with:
-          package: package/package.json
+          package: unpacked/package.json
           token: ${{ secrets.NPM_TOKEN }}
