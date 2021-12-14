@@ -350,13 +350,20 @@ export const makeTsGdProject = async (
     addFn = (path) => initialFiles.push(path)
     readyFn = () => resolve(watcher)
 
+    console.log("creating watcher")
+
     const watcher: chokidar.FSWatcher = chokidar
       .watch(ts2gdJson.rootPath, {
         ignored: (path: string, stats?: fs.Stats) => {
           // Chokidar is inconsistent about whether it passes in stats or not -
           // sometimes it does and sometimes it doesn't.
 
-          return !shouldIncludePath(path, stats ?? fs.statSync(path))
+          const shouldInclude = shouldIncludePath(
+            path,
+            stats ?? fs.statSync(path)
+          )
+          console.log("include", path, shouldInclude)
+          return !shouldInclude
         },
       })
       .on("add", addFn)

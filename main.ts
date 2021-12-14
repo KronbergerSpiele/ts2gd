@@ -217,7 +217,7 @@ const setup = (tsgdJson: Paths) => {
       clearInterval(interval)
       tsUpdateResolve()
     }
-  }, 100)
+  }, 10000)
 
   const host = ts.createWatchCompilerHost(
     tsgdJson.tsconfigPath,
