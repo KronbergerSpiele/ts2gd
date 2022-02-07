@@ -1,6 +1,13 @@
-# ts2gd: Compile TypeScript to GDScript
+# ⚠️ Fork
 
-⚠️ Need help? Contact me on Discord: johnfn#0001.
+This is a fork of [ts2gd](https://github.com/johnfn/ts2gd).
+Differences:
+
+- Windows support
+- Reworked project harness (in progress)
+- The original MIT license is sublicensed to GPLv3+
+
+# ts2gd: Compile TypeScript to GDScript
 
 ## Why use ts2gd?
 
