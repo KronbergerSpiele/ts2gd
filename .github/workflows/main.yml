@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
 
 jobs:
@@ -21,9 +21,9 @@ jobs:
       - run: npm run build-ci
       - run: npm run test-ci
 
-      - if: ${{ github.ref == 'refs/heads/main' && matrix.os == 'ubuntu-latest' }}
+      - if: ${{ github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-latest' }}
         run: npm pack
-      - if: ${{ github.ref == 'refs/heads/main' && matrix.os == 'ubuntu-latest' }}
+      - if: ${{ github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-latest' }}
         name: Upload build
         uses: actions/upload-artifact@v2
         with:
@@ -32,7 +32,7 @@ jobs:
 
   publish:
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Download build
