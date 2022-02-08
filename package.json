@@ -12,7 +12,7 @@
     "build-ci": "tsc",
     "test-ci": "node js/tests/test.js",
     "project-test": "ts-node-dev --respawn --clear tests/project_tests.ts",
-    "prepare": "husky install",
+    "prepare": "is-ci || husky install",
     "lint-staged": "lint-staged",
     "generate-defs": "ts-node main.ts --buildLibraries --buildOnly mockProject/ts2gd.json"
   },
@@ -45,6 +45,7 @@
   "dependencies": {
     "chalk": "^4.1.2",
     "chokidar": "^3.5.2",
+    "is-ci": "^3.0.1",
     "lodash": "^4.17.21",
     "pkginfo": "^0.4.1",
     "tsutils": "^3.21.0",
