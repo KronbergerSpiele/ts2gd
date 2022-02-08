@@ -43,6 +43,9 @@ jobs:
           path: ./
       - run: ls -lah
       - run: tar xzvf *.tgz
+      - run: |
+          cd package
+          npm set-script prepare ""
       - uses: JS-DevTools/npm-publish@v1
         with:
           package: package/package.json
