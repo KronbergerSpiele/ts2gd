@@ -12,7 +12,7 @@
     "build-ci": "tsc",
     "test-ci": "node js/tests/test.js",
     "project-test": "ts-node-dev --respawn --clear tests/project_tests.ts",
-    "prepare": "husky install",
+    "prepare": "node ./prepare.js",
     "lint-staged": "lint-staged",
     "generate-defs": "ts-node main.ts --buildLibraries --buildOnly mockProject/ts2gd.json"
   },
