@@ -213,8 +213,6 @@ export class TsGdProject {
 
     // Just noisy, since it's not caused by a user action
     if (!path.endsWith(".d.ts")) {
-      if (!this.args.debug) console.clear()
-
       if (path.endsWith(".ts")) {
         message = `${chalk.whiteBright("Compile:")} ${chalk.blueBright(
           path
@@ -304,7 +302,7 @@ export class TsGdProject {
     await Promise.all(
       assetsToCompile.map((asset) => asset.compile(this.program))
     )
-    return !this.errors.display("Compiling all source files...")
+    return !this.errors.display("Finished compilation")
   }
 
   shouldBuildLibraryDefinitions(flags: ParsedArgs) {

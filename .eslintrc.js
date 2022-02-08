@@ -4,6 +4,7 @@ module.exports = {
     "**/mockProject/**",
     "**/godot_src/**",
     "**/js/**",
+    "**/bin/**",
     ".eslintrc.js",
   ],
   env: {

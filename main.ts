@@ -156,11 +156,10 @@ import ts from "typescript"
 
 import { ParsedArgs, parseArgs, printHelp } from "./parse_args"
 import { Paths } from "./project/paths"
-import { checkVersionAsync, getInstalledVersion } from "./check_version"
 import { makeTsGdProject } from "./project/project"
-import { showLoadingMessage } from "./tui"
+import { showInfo } from "./tui"
 
-const setup = (tsgdJson: Paths) => {
+function setup(tsgdJson: Paths) {
   const formatHost: ts.FormatDiagnosticsHost = {
     getCanonicalFileName: (path: string) => path,
     getCurrentDirectory: ts.sys.getCurrentDirectory,
@@ -246,19 +245,19 @@ const setup = (tsgdJson: Paths) => {
   }
 }
 
-export const main = async (args: ParsedArgs) => {
+export async function main(args: ParsedArgs) {
   const start = new Date().getTime()
 
   const tsgdJson = new Paths(args)
 
-  showLoadingMessage("Initializing TypeScript", args)
+  showInfo("Initializing TypeScript")
   const { program, tsInitializationFinished } = setup(tsgdJson)
 
-  showLoadingMessage("Scanning project", args)
+  showInfo("Scanning project")
   let project = await makeTsGdProject(tsgdJson, program, args)
 
   if (args.buildLibraries || project.shouldBuildLibraryDefinitions(args)) {
-    showLoadingMessage("Building definition files", args)
+    showInfo("Building definition files")
     await project.buildLibraryDefinitions()
   }
 
@@ -266,14 +265,14 @@ export const main = async (args: ParsedArgs) => {
 
   // This resolves a race condition where TS would not be aware of all the files
   // we just saved in buildAllDefinitions().
-  showLoadingMessage("Waiting for TypeScript to finish", args)
+  showInfo("Waiting for TypeScript to finish")
   await tsInitializationFinished
 
   if (!project.validateAutoloads()) {
     process.exit(1)
   }
 
-  showLoadingMessage("Compiling all source files", args)
+  showInfo("Compiling all source files")
   let hadErrors = true
   try {
     hadErrors = !(await project.compileAllSourceFiles())
@@ -285,38 +284,32 @@ export const main = async (args: ParsedArgs) => {
     }
   }
 
-  if (args.buildOnly) {
-    showLoadingMessage(
-      `Build complete in ${(new Date().getTime() - start) / 1000 + "s"}`,
-      args,
-      true
-    )
+  showInfo(`Completed in ${(new Date().getTime() - start) / 1000 + "s"}`)
 
+  if (args.buildOnly) {
     process.exit(hadErrors ? -1 : 0)
-  } else {
-    showLoadingMessage(
-      `Startup complete in ${(new Date().getTime() - start) / 1000 + "s"}`,
-      args,
-      true
-    )
   }
 }
 
-const args = parseArgs()
+export function run(version: string) {
+  console.log(`ts2gd-${version}`)
+  const args = parseArgs()
+  if (args.help) {
+    printHelp()
+  } else if (args.printVersion) {
+    // Nothing to do; we already printed the version.
+  } else {
+    void (async () => {
+      try {
+        await main(args)
+      } catch (e) {
+        console.error(e)
+        process.exit(1)
+      }
+    })()
+  }
+}
 
-// checkVersionAsync()
-
-if (args.help) {
-  printHelp()
-} else if (args.printVersion) {
-  // Nothing to do; we already printed the version.
-} else {
-  void (async () => {
-    try {
-      await main(args)
-    } catch (e) {
-      console.error(e)
-      process.exit(1)
-    }
-  })()
+if (require.main === module) {
+  run("dev")
 }

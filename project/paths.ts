@@ -6,7 +6,7 @@ import type { Matcher } from "anymatch"
 
 import { ParsedArgs } from "../parse_args"
 import { defaultTsconfig } from "../generate_library_defs/generate_tsconfig"
-import { showLoadingMessage } from "../tui"
+import { showInfo } from "../tui"
 
 import { allNonTsAssetExtensions } from "./assets"
 
@@ -229,7 +229,7 @@ export class Paths {
     )
 
     if (!fs.existsSync(this.tsconfigPath)) {
-      showLoadingMessage("Creating tsconfig.json", args)
+      showInfo("Creating tsconfig.json")
 
       fs.writeFileSync(this.tsconfigPath, defaultTsconfig)
     }

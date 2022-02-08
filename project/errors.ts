@@ -52,20 +52,13 @@ export class Errors {
   }
 
   display(message: string) {
-    if (!this.args.debug) {
-      console.clear()
-    }
-
     if (this.errors.length === 0) {
       console.info(message)
-      console.info()
-      console.info(chalk.greenBright("No errors."))
-
+      console.info(chalk.greenBright("No errors"))
       return false
     }
 
     console.info(message)
-    console.info()
     console.info(
       chalk.redBright(
         `${this.errors.length} error${this.errors.length > 1 ? "s" : ""}.`

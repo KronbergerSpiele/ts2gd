@@ -13,9 +13,9 @@
     "test-ci": "node js/tests/test.js",
     "test-ci-jest": "jest --coverage",
     "project-test": "ts-node-dev --respawn --clear tests/project_tests.ts",
-    "prepare": "is-ci || husky install",
+    "prepare": "husky install",
     "lint-staged": "lint-staged",
-    "generate-defs": "ts-node main.ts --buildLibraries --buildOnly mockProject/ts2gd.json"
+    "generate-defs": "ts-node-dev main.ts --buildLibraries --buildOnly mockProject/ts2gd.json"
   },
   "prepublish": "tsc",
   "bin": {
@@ -46,10 +46,9 @@
   "dependencies": {
     "chalk": "^4.1.2",
     "chokidar": "^3.5.2",
-    "is-ci": "^3.0.1",
     "lodash": "^4.17.21",
-    "pkginfo": "^0.4.1",
     "tsutils": "^3.21.0",
+    "typescript": "^4.5.2",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
@@ -59,7 +58,6 @@
     "@types/jest": "^27.0.3",
     "@types/lodash": "^4.14.178",
     "@types/node": "^16.11.9",
-    "@types/pkginfo": "^0.4.0",
     "@types/xml2js": "^0.4.9",
     "@typescript-eslint/eslint-plugin": "^5.7.0",
     "@typescript-eslint/parser": "^5.7.0",
@@ -72,8 +70,6 @@
     "jest": "^27.4.5",
     "lint-staged": "^12.1.2",
     "prettier": "^2.5.1",
-    "ts-node": "^10.4.0",
-    "ts-node-dev": "^1.1.8",
-    "typescript": "^4.5.2"
+    "ts-node-dev": "^1.1.8"
   }
 }

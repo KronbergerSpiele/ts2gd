@@ -5,6 +5,7 @@ import { parseStringPromise } from "xml2js"
 
 import { Paths } from "../project"
 import { copyFolderRecursiveSync } from "../ts_utils"
+import { showInfo } from "../tui"
 
 import writeBaseDefinitions from "./generate_base"
 import {
@@ -282,13 +283,13 @@ declare var ${className}: typeof ${className}Constructor & {
       !fs.existsSync(this.paths.csgClassesPath) ||
       !fs.existsSync(this.paths.normalClassesPath)
     ) {
-      console.info("No Godot source installation found, writing from backup...")
+      showInfo("No Godot source installation found, writing from backup")
 
       let localGodotDefs = path.join(__dirname, "..", "..", "_godot_defs")
 
       copyFolderRecursiveSync(localGodotDefs, this.paths.rootPath)
 
-      console.info("Done.")
+      showInfo("Done")
 
       return
     }
