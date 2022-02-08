@@ -10,6 +10,7 @@
     "dev": "ts-node-dev --respawn main.ts",
     "test": "ts-node-dev --respawn --clear tests/test.ts",
     "build-ci": "tsc",
+    "test-jest": "jest",
     "test-ci": "node js/tests/test.js",
     "test-ci-jest": "jest --coverage",
     "project-test": "ts-node-dev --respawn --clear tests/project_tests.ts",

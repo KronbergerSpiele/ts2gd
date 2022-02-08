@@ -171,6 +171,7 @@ export class TsGdProject {
   monitor(watcher?: chokidar.FSWatcher) {
     watcher
       ?.on("add", async (path) => {
+        console.log(path)
         const message = await this.onAddAsset(path)
 
         this.errors.display(message)

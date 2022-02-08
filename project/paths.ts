@@ -8,7 +8,7 @@ import { ParsedArgs } from "../parse_args"
 import { defaultTsconfig } from "../generate_library_defs/generate_tsconfig"
 import { showInfo } from "../tui"
 
-import { allNonTsAssetExtensions } from "./assets"
+import { allAssetExtensions } from "./assets"
 
 // TODO: Do sourceTsPath and destGdPath have to be relative?
 
@@ -45,7 +45,6 @@ export class Paths {
   readonly gdscriptPath: string
 
   readonly additionalIgnores: string[]
-  readonly tsFileIgnores: string[]
 
   resPathToFsPath(resPath: string) {
     return path.normalize(
@@ -110,23 +109,20 @@ export class Paths {
       "**/node_modules/**",
       "**/_godot_defs/**",
       "**/.git/**",
+      // ignore all files that aren't one of our extensions
+      new RegExp(`^(?!.+(${allAssetExtensions().join("|")})$).*\\..*$`, "i"),
+      // and ignore all .d.ts files (as they have our ts extension)
+      new RegExp(/.*\.d\.ts$/, "i"),
+      // and some files with no extension
+      new RegExp(/(README|LICENSE)$/, "i"),
+
       ...this.additionalIgnores,
-      // ignore all files with extension
-      "**/*.*",
-      // ignore some files with no extensions (is there a better way?)
-      /(LICENSE|README)$/,
-      // but don't ignore non declaration typescript files
-      // also exclude ts files from the ignore field in the ts2gd.json file
-      `!**/!(*.d${this.tsFileIgnores.map((ignore) => `|${ignore}`)}).ts`,
-      // and don't ignore the following assets
-      ...allNonTsAssetExtensions().map((ext) => `!**/*${ext}`),
     ]
   }
 
   constructor(args: ParsedArgs) {
     if (args.init) {
       this.init()
-
       process.exit(0)
     }
 
@@ -213,15 +209,7 @@ export class Paths {
       "modules/gdscript/doc_classes"
     )
 
-    this.additionalIgnores = []
-    this.tsFileIgnores = []
-    for (const entry of (tsgdJson.ignore as string[]) ?? []) {
-      if (entry.endsWith(".ts")) {
-        this.tsFileIgnores.push(entry.replace(/\.ts$/, ""))
-      } else {
-        this.additionalIgnores.push(entry)
-      }
-    }
+    this.additionalIgnores = tsgdJson.ignore ?? []
 
     this.tsconfigPath = path.join(
       path.dirname(fullyQualifiedTs2gdPathWithFilename),
