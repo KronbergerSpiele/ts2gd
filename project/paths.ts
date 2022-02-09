@@ -120,6 +120,9 @@ export class Paths {
     ]
   }
 
+  /** Should we strip comments from the godot output? */
+  removeComments: boolean
+
   constructor(args: ParsedArgs) {
     if (args.init) {
       this.init()
@@ -210,6 +213,8 @@ export class Paths {
     )
 
     this.additionalIgnores = tsgdJson.ignore ?? []
+
+    this.removeComments = tsgdJson.removeComments ?? false
 
     this.tsconfigPath = path.join(
       path.dirname(fullyQualifiedTs2gdPathWithFilename),

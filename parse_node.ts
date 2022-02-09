@@ -1,8 +1,7 @@
 import * as utils from "tsutils"
 import ts, { SyntaxKind, tokenToString } from "typescript"
 
-import { AssetSourceFile } from "./project/assets/asset_source_file"
-import TsGdProject, { ErrorName } from "./project"
+import TsGdProject, { ErrorName, AssetSourceFile } from "./project"
 import { LibraryFunctionName } from "./parse_node/library_functions"
 import { Scope } from "./scope"
 import {
@@ -63,6 +62,7 @@ import { parseVariableDeclarationList } from "./parse_node/parse_variable_declar
 import { parseVariableStatement } from "./parse_node/parse_variable_statement"
 import { parseWhileStatement } from "./parse_node/parse_while_statement"
 import { parseYieldExpression } from "./parse_node/parse_yield_expression"
+import { parseComments } from "./parse_node/parse_node_with_comments"
 
 export type ParseState = {
   isConstructor: boolean
@@ -83,6 +83,7 @@ export type ParseState = {
   usages: Map<ts.Identifier, utils.VariableInfo>
   sourceFile: ts.SourceFile
   sourceFileAsset: AssetSourceFile
+  commentsStack?: ts.CommentRange[]
 }
 
 export enum ExtraLineType {
@@ -248,8 +249,13 @@ export function combine(args: {
 
 export const parseNode = (
   genericNode: ts.Node,
-  props: ParseState
+  props: ParseState,
+  options?: { ignoreComments?: boolean }
 ): ParseNodeType => {
+  if (!props.project.paths.removeComments && !options?.ignoreComments) {
+    return parseComments(genericNode, props)
+  }
+
   switch (genericNode.kind) {
     case SyntaxKind.SourceFile:
       return parseSourceFile(genericNode as ts.SourceFile, props)
