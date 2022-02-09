@@ -34,7 +34,7 @@ export enum ErrorName {
 export type TsGdError = {
   error: ErrorName
   location: ts.Node | string
-  stack: string
+  stack?: string
   description: string
 }
 

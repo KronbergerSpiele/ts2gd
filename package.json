@@ -4,19 +4,17 @@
   "description": "TypeScript to GDScript transpiler.",
   "main": "js/main.js",
   "scripts": {
-    "publish-local": "npm run tsc && npm link",
-    "auto-publish": "npm run tsc && git add . && git commit -m 'include generated JS' && npm version patch && npm publish",
-    "tsc": "tsc",
-    "dev": "ts-node-dev --respawn main.ts",
-    "test": "ts-node-dev --respawn --clear tests/test.ts",
+    "build": "tsc",
     "build-ci": "tsc",
+    "dev": "ts-node-dev --respawn main.ts",
+    "generate-defs": "ts-node-dev main.ts --buildLibraries --buildOnly mockProject/ts2gd.json",
+    "lint-staged": "lint-staged",
+    "prepare": "husky install",
+    "project-test": "ts-node-dev --respawn --clear tests/project_tests.ts",
+    "test": "ts-node-dev --respawn --clear tests/test.ts",
     "test-jest": "jest",
     "test-ci": "node js/tests/test.js",
-    "test-ci-jest": "jest --coverage",
-    "project-test": "ts-node-dev --respawn --clear tests/project_tests.ts",
-    "prepare": "husky install",
-    "lint-staged": "lint-staged",
-    "generate-defs": "ts-node-dev main.ts --buildLibraries --buildOnly mockProject/ts2gd.json"
+    "test-ci-jest": "jest --coverage"
   },
   "prepublish": "tsc",
   "bin": {

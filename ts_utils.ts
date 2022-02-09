@@ -8,14 +8,7 @@ import { ParseState } from "./parse_node"
 import { ErrorName } from "./project"
 
 export const isNullableNode = (node: ts.Node, typechecker: ts.TypeChecker) => {
-  const type = typechecker.getTypeAtLocation(node)
-
-  return (
-    type.isUnion() &&
-    type.types.find(
-      (type) => type.flags & TypeFlags.Null || type.flags & TypeFlags.Undefined
-    )
-  )
+  return isNullableType(typechecker.getTypeAtLocation(node))
 }
 
 export const isNullableType = (type: ts.Type) => {
@@ -133,6 +126,46 @@ export function isEnumType(type: ts.Type) {
 
 export const syntaxKindToString = (kind: ts.Node["kind"]) => {
   return ts.SyntaxKind[kind]
+}
+
+function getNonNullableTypeAndNodes(
+  type: ts.Type,
+  node: ts.TypeNode
+): [ts.Type[], ts.TypeNode[]] {
+  // Remove the nullable parts of the type and try again
+
+  let nonNullTypes: ts.Type[] = []
+  let nonNullTypeNodes: ts.TypeNode[] = []
+
+  if (type.isUnion()) {
+    nonNullTypes = type.types.filter((type) => {
+      return !(type.flags & TypeFlags.Null || type.flags & TypeFlags.Undefined)
+    })
+
+    if (node.kind === SyntaxKind.UnionType) {
+      const unionTypeNode = node as ts.UnionTypeNode
+
+      nonNullTypeNodes = unionTypeNode.types.filter((typeNode) => {
+        if (typeNode.kind === SyntaxKind.LiteralType) {
+          const litType = typeNode as ts.LiteralTypeNode
+
+          return !(
+            litType.literal.kind === SyntaxKind.NullKeyword ||
+            litType.literal.kind === SyntaxKind.UndefinedKeyword
+          )
+        }
+
+        // Apparently `undefined` is just a keyword, whereas null is a
+        // literal??? I'm confused.
+        if (typeNode.kind === SyntaxKind.UndefinedKeyword) {
+          return false
+        }
+
+        return true
+      })
+    }
+  }
+  return [nonNullTypes, nonNullTypeNodes]
 }
 
 /**
@@ -259,65 +292,37 @@ ${chalk.yellow(node.getText())}
     return null
   }
 
-  if (isNullableType(typecheckerInferredType)) {
+  if (
+    typecheckerInferredType.isUnion() &&
+    isNullableType(typecheckerInferredType)
+  ) {
     // Remove the nullable parts of the type and try again
+    const [nonNullTypes, nonNullTypeNodes] = getNonNullableTypeAndNodes(
+      typecheckerInferredType,
+      actualType
+    )
 
-    let nonNullTypes: ts.Type[] = []
-    let nonNullTypeNodes: ts.TypeNode[] = []
-
-    if (typecheckerInferredType.isUnion()) {
-      nonNullTypes = typecheckerInferredType.types.filter((type) => {
-        return !(
-          type.flags & TypeFlags.Null || type.flags & TypeFlags.Undefined
-        )
+    if (nonNullTypes.length > 1 || nonNullTypeNodes.length > 1) {
+      props.project.errors.add({
+        description: `You can't export a union type:${chalk.yellow(
+          node.getText()
+        )}`,
+        error: ErrorName.ExportedVariableError,
+        location: node,
+        stack: new Error().stack,
       })
 
-      if (actualType.kind === SyntaxKind.UnionType) {
-        const unionTypeNode = actualType as ts.UnionTypeNode
-
-        nonNullTypeNodes = unionTypeNode.types.filter((typeNode) => {
-          if (typeNode.kind === SyntaxKind.LiteralType) {
-            const litType = typeNode as ts.LiteralTypeNode
-
-            return !(
-              litType.literal.kind === SyntaxKind.NullKeyword ||
-              litType.literal.kind === SyntaxKind.UndefinedKeyword
-            )
-          }
-
-          // Apparently `undefined` is just a keyword, whereas null is a
-          // literal??? I'm confused.
-          if (typeNode.kind === SyntaxKind.UndefinedKeyword) {
-            return false
-          }
-
-          return true
-        })
-      }
-
-      if (nonNullTypes.length > 1 || nonNullTypeNodes.length > 1) {
-        props.project.errors.add({
-          description: `You can't export a union type:
-
-${chalk.yellow(node.getText())}          
-          `,
-          error: ErrorName.ExportedVariableError,
-          location: node,
-          stack: new Error().stack ?? "",
-        })
-
-        return null
-      }
-
-      return getGodotType(
-        node,
-        nonNullTypes[0],
-        props,
-        isExport,
-        initializer,
-        nonNullTypeNodes[0]
-      )
+      return null
     }
+
+    return getGodotType(
+      node,
+      nonNullTypes[0],
+      props,
+      isExport,
+      initializer,
+      nonNullTypeNodes[0]
+    )
   }
 
   if (isDictionary(typecheckerInferredType)) {
