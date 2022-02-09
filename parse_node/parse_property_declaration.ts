@@ -372,7 +372,7 @@ export const testNormalExportedVariable5: Test = {
   ts: `
 export class Test {
   @exports
-  foo: number[]
+  foo: float[]
 }
   `,
   expected: `
@@ -445,26 +445,12 @@ export class Test {
 }
   `,
   fileName: "Test.ts",
-  expected: {
-    type: "multiple-files",
-    files: [
-      {
-        fileName: mockProjectPath("Test.gd"),
-        expected: `
+  expected: `
 class_name Test
-const MyEnum = preload("res://Test_MyEnum.gd").MyEnum
-export(MyEnum) var foo
-      `,
-      },
-
-      {
-        fileName: mockProjectPath("Test_MyEnum.gd"),
-        expected: `
 const MyEnum = {
-}`,
-      },
-    ],
-  },
+}
+export(MyEnum) var foo
+  `,
 }
 
 export const testExportObj: Test = {

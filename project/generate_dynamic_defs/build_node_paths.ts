@@ -78,12 +78,23 @@ export default function buildNodePathsTypeForScript(
   // For every potential relative path, validate that it can be found
   // in each instantiated node.
 
-  const className = script.exportedTsClassName()
+  const className = script.exportedTsClassName(true)
+  const classNode = script.getClassNode()
   const extendedClassName = script.extendedClassName()
 
-  if (!className) {
+  const destPath = path.join(
+    project.paths.dynamicGodotDefsPath,
+    `@node_paths_${script.gdClassName}.d.ts`
+  )
+
+  if (!className || !classNode) {
+    fs.writeFileSync(destPath, "")
     return
   }
+
+  const isClassDefault = !("error" in classNode)
+    ? classNode.modifiers?.some((v) => v.getText() === "default")
+    : false
 
   let commonRelativePaths: {
     path: string
@@ -185,7 +196,14 @@ export default function buildNodePathsTypeForScript(
   const pathToImport: { [key: string]: string } = {}
 
   for (const { path, node } of commonRelativePaths) {
-    pathToImport[path] = node.getScript()?.tsType ?? node.tsType
+    const script = node.getScript()
+    const className = script?.exportedTsClassName()
+
+    if (script && className) {
+      pathToImport[path] = script.tsType
+    } else {
+      pathToImport[path] = node.tsType
+    }
   }
 
   type RecursivePath = {
@@ -268,28 +286,30 @@ declare type NodePathToType${className} = {
 ${Object.entries(pathToImport)
   .map(([path, importStr]) => `  "${path}": ${importStr},`)
   .join("\n")}
-}    
+}
 `
 
   result += `
-  
-import { ${className} } from '${script.tsRelativePath()}'
+
+import ${
+    isClassDefault ? className : "{ " + className + " }"
+  } from '${script.tsRelativePath()}'
 
 declare module '${script.tsRelativePath()}' {
   enum ADD_A_GENERIC_TYPE_TO_GET_NODE_FOR_THIS_TO_WORK {}
 
-  interface ${className} {
+  export${isClassDefault ? " default" : ""} interface ${className} {
     /**
      * Gets a node by a string path. There are two ways to use this function:
-     * 
+     *
      * 1. this.get_node("KnownNode") - Use this when ts2gd can prove there's a
      * node at the path you provide
-     * 
+     *
      * 2. this.get_node<Label>("DynamicNode") - Use this when ts2gd can't prove
      * there's a node at the provided path, but you know that it is there. Be
      * sure to add the type parameter (e.g. <Label>) to indicate to ts2gd what
      * type of node you're retrieving - otherwise there will be an error!
-     * 
+     *
      * N.B. It *should* be possible to use ts2gd without *ever* having to revert
      * to the second get_node call with the type parameter. Please open a GitHub
      * issue if you feel this isn't the case.
@@ -312,11 +332,5 @@ declare module '${script.tsRelativePath()}' {
   }
 }
 `
-
-  const destPath = path.join(
-    project.paths.dynamicGodotDefsPath,
-    `@node_paths_${script.gdClassName}.d.ts`
-  )
-
   fs.writeFileSync(destPath, result)
 }

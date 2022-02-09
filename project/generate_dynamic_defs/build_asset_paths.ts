@@ -23,7 +23,7 @@ declare type SceneName =
 ${project.assets
   .filter(isAssetGodotScene)
   .map((obj) => `  | '${obj.resPath}'`)
-  .join("\n")}
+  .join("\n")} || "  never;"
 
 declare type AssetPath = keyof AssetType;
   `

@@ -1,6 +1,6 @@
 import ts, { SyntaxKind } from "typescript"
 
-import { ErrorName } from "../project/errors"
+import { ErrorName } from "../project"
 import { ParseNodeType, ParseState, combine } from "../parse_node"
 
 /**

@@ -317,13 +317,6 @@ export class AssetGodotScene extends AssetBase {
       const className = rootSourceFile.exportedTsClassName()
 
       if (!className) {
-        this.project.errors.add({
-          description: `Failed to find classname for ${rootScript.fsPath}`,
-          error: ErrorName.Ts2GdError,
-          location: rootScript.fsPath,
-          stack: new Error().stack ?? "",
-        })
-
         return "any"
       }
 

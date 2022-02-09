@@ -13,7 +13,7 @@ export abstract class AssetBase {
   readonly resPath: string
 
   /** e.g. import('/Users/johnfn/GodotGame/scripts/Enemy').Enemy */
-  abstract get tsType(): string | null
+  abstract get tsType(): string
 
   /** file extensions which this asset class should be used for */
   static readonly extensions: string[] = []
